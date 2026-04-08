@@ -67,7 +67,13 @@ public class ApplicationConfig {
 
     private static void configurePlugins(JavalinConfig config) {
         config.router.contextPath = Routes.API_CONTEXT_PATH;
-        config.bundledPlugins.enableRouteOverview("/routes");
+        if (!isDeployed()) {
+            config.bundledPlugins.enableRouteOverview("/routes");
+        }
+    }
+
+    private static boolean isDeployed() {
+        return Boolean.parseBoolean(System.getenv().getOrDefault("DEPLOYED", "false"));
     }
 
     private static void configureRoutes(JavalinConfig config, Routes routes) {

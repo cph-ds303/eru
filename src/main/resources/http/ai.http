@@ -1,6 +1,7 @@
 ### Elaborate content with AI
 POST {{url}}/ai/elaborate
 Content-Type: application/json
+Authorization: Bearer {{token}}
 
 {
   "title": "Bananas are slightly radioactive",

@@ -16,8 +16,5 @@ public class SecurityRoutes {
                 "status", "running"
         )), AppRole.ANYONE);
         routes.get("/health", ctx -> ctx.json(Map.of("status", "ok")), AppRole.ANYONE);
-        routes.get("/protected/open_demo", ctx -> ctx.json(Map.of("message", "Hello from open endpoint")), AppRole.ANYONE);
-        routes.get("/protected/user_demo", ctx -> ctx.json(Map.of("message", "Hello from USER protected endpoint")), AppRole.USER);
-        routes.get("/protected/admin_demo", ctx -> ctx.json(Map.of("message", "Hello from ADMIN protected endpoint")), AppRole.ADMIN);
     }
 }
