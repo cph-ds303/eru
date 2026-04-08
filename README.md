@@ -94,7 +94,7 @@ Used together with `User` in a many-to-many relationship for authorization.
 
 - `GET /api/v1/`
 - `GET /api/v1/health`
-- `GET /api/v1/routes` (local/dev only)
+- `GET /api/v1/routes`
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
 - `GET /api/v1/content`
