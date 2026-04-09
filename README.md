@@ -57,11 +57,15 @@ eru is built as a layered backend architecture with a clear separation of respon
 
 ## Architecture Diagram
 
-```mermaid  
-flowchart LR  
-    Client[Client / HTTP Client]    Controllers[Routes + Controllers]    Services[Services]    DAOs[DAOs]    DB[(PostgreSQL)]    Auth[JWT + Access Manager]    AI[OpenAI Service]  
-    Client --> Controllers    Controllers --> Services    Services --> DAOs    DAOs --> DB    Auth --> Controllers    Services --> AI  
-```  
+```mermaid
+flowchart LR
+    Client["Client / HTTP Client"] --> Controllers["Routes and Controllers"]
+    Controllers --> Services["Services"]
+    Services --> DAOs["DAOs"]
+    DAOs --> DB[("PostgreSQL")]
+    Auth["JWT and Access Manager"] --> Controllers
+    Services --> AI["OpenAI Service"]
+```
 
 The application is exposed under the base path `/api/v1`. Route protection is handled through Javalin role checks combined with JWT validation, while persistence is handled through Hibernate-backed DAOs.
   
