@@ -1,0 +1,56 @@
+@startuml
+title ERU - ERD
+
+hide circle
+skinparam linetype ortho
+
+entity "users" as users {
+  *user_id : INTEGER <<PK>>
+  --
+  username : VARCHAR <<UNIQUE>>
+  first_name : VARCHAR
+  last_name : VARCHAR
+  email : VARCHAR <<UNIQUE>>
+  password_hash : VARCHAR
+  created_at : TIMESTAMP
+}
+
+entity "roles" as roles {
+  *role_id : INTEGER <<PK>>
+  --
+  name : VARCHAR <<UNIQUE>>
+}
+
+entity "user_roles" as user_roles {
+  *user_id : INTEGER <<FK>>
+  *role_id : INTEGER <<FK>>
+}
+
+entity "content" as content {
+  *id : INTEGER <<PK>>
+  --
+  title : VARCHAR
+  body : TEXT
+  content_type : VARCHAR
+  category : VARCHAR
+  source : VARCHAR
+  author : VARCHAR
+  active : BOOLEAN
+  created_at : TIMESTAMP
+}
+
+entity "user_interactions" as user_interactions {
+  *interaction_id : INTEGER <<PK>>
+  --
+  user_id : INTEGER <<FK>>
+  content_id : INTEGER <<FK>>
+  reaction_type : VARCHAR
+  created_at : TIMESTAMP
+}
+
+users ||--o{ user_roles
+roles ||--o{ user_roles
+users ||--o{ user_interactions
+content ||--o{ user_interactions
+
+@enduml

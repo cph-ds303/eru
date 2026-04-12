@@ -1,0 +1,65 @@
+@startuml
+title ERU - Domaenemodel
+
+hide circle
+hide empty members
+skinparam classAttributeIconSize 0
+
+class User {
+  +id: Integer
+  +username: String
+  +firstName: String
+  +lastName: String
+  +email: String
+  +passwordHash: String
+  +createdAt: LocalDateTime
+  --
+  +verifyPassword(pw: String): boolean
+  +addRole(role: Role): void
+  +removeRole(role: String): void
+}
+
+class Role {
+  +id: Integer
+  +name: String
+}
+
+class Content {
+  +id: Integer
+  +title: String
+  +body: String
+  +contentType: ContentType
+  +category: String
+  +source: String
+  +author: String
+  +active: boolean
+  +createdAt: LocalDateTime
+}
+
+class UserInteraction {
+  +id: Integer
+  +reactionType: ReactionType
+  +createdAt: LocalDateTime
+}
+
+enum ContentType {
+  FACT
+  THEORY
+  QUOTE
+}
+
+enum ReactionType {
+  LIKE
+  DISLIKE
+  VIEW
+  BOOKMARK
+  ELABORATE
+}
+
+User "*" -- "*" Role : roles
+User "1" -- "0..*" UserInteraction : performs
+Content "1" -- "0..*" UserInteraction : receives
+Content --> ContentType
+UserInteraction --> ReactionType
+
+@enduml
