@@ -272,14 +272,7 @@ Known API errors are returned in this format:
 
 | Method | URL | Request Body | Response | Status |  
 |---|---|---|---|---|  
-| POST | `/ai/elaborate` | `ElaborateRequestDTO` | `ElaborateResponseDTO` | 200 / 400 / 401 / 500 |  
-
-### ElaborateRequestDTO
-
-```json  
-{  
-  "title": "Black holes",  "body": "A black hole is a region in space where gravity is extremely strong."}  
-```  
+| POST | `/content/{id}/elaborate` | None | `ElaborateResponseDTO` | 200 / 400 / 401 / 404 / 500 |  
 
 ## Utility Endpoints
 

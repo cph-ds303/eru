@@ -18,15 +18,16 @@ GET {{url}}/content
 Accept: application/json
 
 ### Get content filtered by type
-GET {{url}}/content?type=FACT
+GET {{url}}/content?type=THEORY
 Accept: application/json
+
 
 ### Get only active content
 GET {{url}}/content?activeOnly=true
 Accept: application/json
 
 ### Get content by id
-GET {{url}}/content/1
+GET {{url}}/content/10
 Accept: application/json
 
 ### Update content
@@ -58,12 +59,26 @@ Authorization: Bearer {{token}}
   "reactionType": "BOOKMARK"
 }
 
+### Mark content as viewed
+POST {{url}}/content/1/interactions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reactionType": "VIEW"
+}
+
 ### Get interactions for content
 GET {{url}}/content/1/interactions
 Accept: application/json
 
 ### Get current user's interactions
 GET {{url}}/interactions/me
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get unseen feed for current user
+GET {{url}}/content/feed
 Authorization: Bearer {{token}}
 Accept: application/json
 

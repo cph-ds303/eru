@@ -31,8 +31,12 @@ public class OpenAiClient {
     public String elaborateContent(String title, String body) {
         try {
             String prompt = """
-                    Explain the following content in a simple, interesting, and educational way.
-                    Keep it concise and easy to understand.
+                    You are helping a learning platform explain short educational content.
+                    Explain the content in 3-5 sentences.
+                    Use simple, clear language.
+                    Focus on learning, not casual chat.
+                    Do not invent facts beyond what can reasonably be inferred from the content.
+                    If the content is unclear, incomplete, or potentially misleading, say that clearly before explaining what you can.
 
                     Title: %s
 

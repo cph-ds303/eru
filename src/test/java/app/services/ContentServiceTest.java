@@ -4,8 +4,12 @@ import app.dtos.requests.ContentRequestDTO;
 import app.dtos.responses.ContentDTO;
 import app.entities.Content;
 import app.entities.enums.ContentType;
+import app.entities.enums.ReactionType;
 import app.exceptions.ApiException;
 import app.persistence.daos.ContentDAO;
+import app.persistence.daos.UserInteractionDAO;
+import app.entities.User;
+import app.entities.UserInteraction;
 import jakarta.persistence.EntityManagerFactory;
 import org.junit.jupiter.api.Test;
 
@@ -65,6 +69,24 @@ class ContentServiceTest {
         assertEquals(1, result.size());
         assertEquals(1, result.get(0).id());
         assertEquals("First", result.get(0).title());
+    }
+
+    @Test
+    void getFeedForUserShouldExcludeContentWithExistingInteractionsAndOnlyReturnActiveContent() {
+        FakeContentDAO contentDAO = new FakeContentDAO();
+        FakeInteractionDAO interactionDAO = new FakeInteractionDAO();
+        contentDAO.seed(content(1, "Seen", ContentType.FACT, true, LocalDateTime.now().minusDays(2)));
+        contentDAO.seed(content(2, "Unseen newest", ContentType.FACT, true, LocalDateTime.now()));
+        contentDAO.seed(content(3, "Inactive unseen", ContentType.FACT, false, LocalDateTime.now().minusHours(1)));
+        interactionDAO.seed(interaction(1, 99, 1, ReactionType.VIEW));
+
+        ContentService service = new ContentService(contentDAO, interactionDAO);
+
+        List<ContentDTO> result = service.getFeedForUser(99, ContentType.FACT);
+
+        assertEquals(1, result.size());
+        assertEquals(2, result.get(0).id());
+        assertEquals("Unseen newest", result.get(0).title());
     }
 
     @Test
@@ -152,6 +174,28 @@ class ContentServiceTest {
                 .build();
     }
 
+    private static UserInteraction interaction(Integer id, Integer userId, Integer contentId, ReactionType reactionType) {
+        User user = new User("user" + userId, "secret123");
+        user.setId(userId);
+
+        Content content = Content.builder()
+                .id(contentId)
+                .title("Seen content")
+                .body("Seen content body")
+                .contentType(ContentType.FACT)
+                .active(true)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        return UserInteraction.builder()
+                .id(id)
+                .user(user)
+                .content(content)
+                .reactionType(reactionType)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
+
     private static class FakeContentDAO extends ContentDAO {
         private final Map<Integer, Content> storage = new LinkedHashMap<>();
         private int nextId = 1;
@@ -230,6 +274,25 @@ class ContentServiceTest {
                     .active(source.isActive())
                     .createdAt(source.getCreatedAt())
                     .build();
+        }
+    }
+
+    private static class FakeInteractionDAO extends UserInteractionDAO {
+        private final Map<Integer, UserInteraction> storage = new LinkedHashMap<>();
+
+        FakeInteractionDAO() {
+            super((EntityManagerFactory) null);
+        }
+
+        void seed(UserInteraction interaction) {
+            storage.put(interaction.getId(), interaction);
+        }
+
+        @Override
+        public List<UserInteraction> getByUserId(Integer userId) {
+            return storage.values().stream()
+                    .filter(interaction -> interaction.getUser().getId().equals(userId))
+                    .toList();
         }
     }
 }

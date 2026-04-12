@@ -11,6 +11,7 @@ public class ContentRoutes {
 
     public static void register(JavalinDefaultRoutingApi routes, ContentController contentController) {
         routes.post("/content", contentController::create, AppRole.ADMIN);
+        routes.get("/content/feed", contentController::getFeed, AppRole.USER);
         routes.get("/content", contentController::getAll, AppRole.ANYONE);
         routes.get("/content/{id}", contentController::getById, AppRole.ANYONE);
         routes.put("/content/{id}", contentController::update, AppRole.ADMIN);

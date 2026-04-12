@@ -10,6 +10,6 @@ public class AiRoutes {
     }
 
     public static void register(JavalinDefaultRoutingApi routes, AiController aiController) {
-        routes.post("/ai/elaborate", aiController::elaborate, AppRole.USER);
+        routes.post("/content/{id}/elaborate", aiController::elaborate, AppRole.USER);
     }
 }

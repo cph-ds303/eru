@@ -6,15 +6,23 @@ import app.entities.Content;
 import app.entities.enums.ContentType;
 import app.exceptions.ApiException;
 import app.persistence.daos.ContentDAO;
+import app.persistence.daos.UserInteractionDAO;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 public class ContentService {
     private final ContentDAO contentDAO;
+    private final UserInteractionDAO interactionDAO;
 
     public ContentService(ContentDAO contentDAO) {
+        this(contentDAO, null);
+    }
+
+    public ContentService(ContentDAO contentDAO, UserInteractionDAO interactionDAO) {
         this.contentDAO = contentDAO;
+        this.interactionDAO = interactionDAO;
     }
 
     public ContentDTO create(ContentRequestDTO request) {
@@ -35,6 +43,30 @@ public class ContentService {
     public List<ContentDTO> getAll(ContentType type, boolean activeOnly) {
         List<Content> content = resolveContentList(type, activeOnly);
 
+        return toSortedContentDtos(content);
+    }
+
+    public List<ContentDTO> getFeedForUser(Integer userId, ContentType type) {
+        if (userId == null) {
+            throw ApiException.badRequest("User id is required");
+        }
+        if (interactionDAO == null) {
+            throw ApiException.internal("Interaction DAO is not configured for feed lookups");
+        }
+
+        Set<Integer> seenContentIds = interactionDAO.getByUserId(userId).stream()
+                .map(interaction -> interaction.getContent().getId())
+                .filter(id -> id != null)
+                .collect(java.util.stream.Collectors.toSet());
+
+        List<Content> content = resolveContentList(type, true).stream()
+                .filter(item -> !seenContentIds.contains(item.getId()))
+                .toList();
+
+        return toSortedContentDtos(content);
+    }
+
+    private static List<ContentDTO> toSortedContentDtos(List<Content> content) {
         return content.stream()
                 .sorted(Comparator.comparing(Content::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(ContentDTO::fromEntity)

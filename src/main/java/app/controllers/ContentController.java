@@ -1,5 +1,6 @@
 package app.controllers;
 
+import app.dtos.internal.AuthenticatedUserDTO;
 import app.dtos.requests.ContentRequestDTO;
 import app.dtos.responses.ContentDTO;
 import app.entities.enums.ContentType;
@@ -34,6 +35,14 @@ public class ContentController {
         ContentType type = parseContentType(typeParam);
 
         List<ContentDTO> content = contentService.getAll(type, activeOnly);
+        ctx.status(200).json(content);
+    }
+
+    public void getFeed(Context ctx) {
+        AuthenticatedUserDTO authenticatedUser = getAuthenticatedUser(ctx);
+        ContentType type = parseContentType(ctx.queryParam("type"));
+
+        List<ContentDTO> content = contentService.getFeedForUser(authenticatedUser.userId(), type);
         ctx.status(200).json(content);
     }
 
@@ -75,5 +84,13 @@ public class ContentController {
         } catch (IllegalArgumentException e) {
             throw ApiException.badRequest("Invalid content type: " + typeParam);
         }
+    }
+
+    private static AuthenticatedUserDTO getAuthenticatedUser(Context ctx) {
+        AuthenticatedUserDTO user = ctx.attribute("user");
+        if (user == null) {
+            throw ApiException.unauthorized("No authenticated user found in request context");
+        }
+        return user;
     }
 }

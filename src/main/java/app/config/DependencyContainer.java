@@ -36,8 +36,8 @@ public class DependencyContainer {
         UserDAO userDAO = new UserDAO();
         UserInteractionDAO userInteractionDAO = new UserInteractionDAO();
 
-        AiController aiController = new AiController(openAiService);
-        ContentController contentController = new ContentController(new ContentService(contentDAO));
+        AiController aiController = new AiController(openAiService, contentDAO);
+        ContentController contentController = new ContentController(new ContentService(contentDAO, userInteractionDAO));
         InteractionController interactionController = new InteractionController(
                 new InteractionService(userInteractionDAO, userDAO, contentDAO)
         );
@@ -57,7 +57,7 @@ public class DependencyContainer {
     private OpenAiService createOpenAiService() {
         String apiKey = resolveApiKey();
         if (apiKey == null) {
-            logger.warn("OPENAI_API_KEY was not found. /api/v1/ai/elaborate will return a configuration error until it is set.");
+            logger.warn("OPENAI_API_KEY was not found. /api/v1/content/{id}/elaborate will return a configuration error until it is set.");
             return null;
         }
 

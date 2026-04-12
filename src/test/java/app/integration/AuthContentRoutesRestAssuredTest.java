@@ -67,7 +67,7 @@ class AuthContentRoutesRestAssuredTest {
         authService = new AuthService(new UserDAO(emf), new JwtUtil(JWT_SECRET));
 
         ContentDAO contentDAO = new ContentDAO(emf);
-        ContentController contentController = new ContentController(new ContentService(contentDAO));
+        ContentController contentController = new ContentController(new ContentService(contentDAO, new UserInteractionDAO(emf)));
         InteractionController interactionController = new InteractionController(
                 new InteractionService(new UserInteractionDAO(emf), new UserDAO(emf), contentDAO)
         );
@@ -206,15 +206,55 @@ class AuthContentRoutesRestAssuredTest {
                 .body("[0].content.title", equalTo("Saved title"));
     }
 
-    private static String registerAdminAndReturnToken(String username) {
+    @Test
+    void feedShouldExcludeContentUserHasAlreadyInteractedWith() {
+        String adminToken = registerAdminAndReturnToken("admin-feed");
+
+        Integer seenContentId =
+                given()
+                        .contentType(ContentType.JSON)
+                        .auth().oauth2(adminToken)
+                        .body(contentPayload("Seen title", "Seen body"))
+                .when()
+                        .post("/content")
+                .then()
+                        .statusCode(201)
+                        .extract()
+                        .path("id");
+
         given()
                 .contentType(ContentType.JSON)
-                .body(registerPayload(username, username + "@example.com"))
+                .auth().oauth2(adminToken)
+                .body(contentPayload("Fresh title", "Fresh body"))
         .when()
-                .post("/auth/register")
+                .post("/content")
         .then()
                 .statusCode(201);
 
+        String userToken = registerAndReturnToken("student-feed");
+
+        given()
+                .contentType(ContentType.JSON)
+                .auth().oauth2(userToken)
+                .body(Map.of("reactionType", "VIEW"))
+        .when()
+                .post("/content/{id}/interactions", seenContentId)
+        .then()
+                .statusCode(200)
+                .body("reactionType", equalTo("VIEW"));
+
+        given()
+                .auth().oauth2(userToken)
+        .when()
+                .get("/content/feed")
+        .then()
+                .statusCode(200)
+                .body("$", hasSize(1))
+                .body("[0].title", equalTo("Fresh title"));
+    }
+
+    private static String registerAdminAndReturnToken(String username) {
+        registerAndReturnToken(username);
         authService.addRole(username, "ADMIN");
 
         return given()
@@ -224,6 +264,18 @@ class AuthContentRoutesRestAssuredTest {
                 .post("/auth/login")
         .then()
                 .statusCode(200)
+                .extract()
+                .path("token");
+    }
+
+    private static String registerAndReturnToken(String username) {
+        return given()
+                .contentType(ContentType.JSON)
+                .body(registerPayload(username, username + "@example.com"))
+        .when()
+                .post("/auth/register")
+        .then()
+                .statusCode(201)
                 .extract()
                 .path("token");
     }

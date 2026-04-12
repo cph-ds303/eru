@@ -72,7 +72,7 @@ class AuthContentRoutesTest {
         );
         authService = new AuthService(new UserDAO(emf), new JwtUtil(JWT_SECRET));
         contentDAO = new ContentDAO(emf);
-        ContentController contentController = new ContentController(new ContentService(contentDAO));
+        ContentController contentController = new ContentController(new ContentService(contentDAO, new UserInteractionDAO(emf)));
         InteractionController interactionController = new InteractionController(
                 new InteractionService(new UserInteractionDAO(emf), new UserDAO(emf), contentDAO)
         );
@@ -180,6 +180,30 @@ class AuthContentRoutesTest {
         assertEquals(1, json.size());
         assertEquals("BOOKMARK", json.get(0).get("reactionType").asText());
         assertEquals("Saved title", json.get(0).get("content").get("title").asText());
+    }
+
+    @Test
+    void feedShouldExcludeContentUserHasAlreadyViewed() throws Exception {
+        String adminToken = registerAdminAndReturnToken("admin-feed");
+        JsonNode seenContent = createContent(adminToken, "Seen title", "Seen body");
+        createContent(adminToken, "Fresh title", "Fresh body");
+
+        String userToken = registerAndReturnToken("student-feed");
+
+        HttpResponse<String> interactionResponse = sendJsonRequest(
+                "POST",
+                "/content/" + seenContent.get("id").asInt() + "/interactions",
+                userToken,
+                Map.of("reactionType", "VIEW")
+        );
+        assertEquals(200, interactionResponse.statusCode());
+
+        HttpResponse<String> response = sendRequest("GET", "/content/feed", userToken, null);
+
+        assertEquals(200, response.statusCode());
+        JsonNode json = readJson(response);
+        assertEquals(1, json.size());
+        assertEquals("Fresh title", json.get(0).get("title").asText());
     }
 
     @Test
