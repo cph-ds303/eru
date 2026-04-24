@@ -11,8 +11,7 @@ The purpose of the project is to explore how a feed-style platform can be used f
 ## Links
 
 Portfolio website:    
-https://cph-ds303.github.io/portfolio/projects/eru-project/
-
+https://www.dinosaldic.dk/projects/eru-project/
 Project overview video (max 5 min):    
 https://drive.google.com/drive/folders/11miq5ZiHGOEkeZKAQC2lV419AwaSLrsV?usp=sharing
 
@@ -20,7 +19,7 @@ Deployed application:
 https://eru-api.dk/api/v1/routes
 
 Source code repository:    
-https://github.com/cph-ds303/eru.git
+https://github.com/copenhagentech/eru
   
 ---  
 
