@@ -12,6 +12,7 @@ The purpose of the project is to explore how a feed-style platform can be used f
 
 Portfolio website:    
 https://www.dinosaldic.dk/projects/eru-project/
+
 Project overview video (max 5 min):    
 https://drive.google.com/drive/folders/11miq5ZiHGOEkeZKAQC2lV419AwaSLrsV?usp=sharing
 
